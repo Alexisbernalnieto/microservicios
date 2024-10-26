@@ -2,39 +2,44 @@ const gateway = require('fast-gateway');
 const express = require('express');
 const path = require('path');
 
-// Utiliza el puerto proporcionado por Render o el puerto 3002 si no está definido
+// Utiliza el puerto proporcionado por Render o el puerto 3000 si no está definido
 const port = process.env.PORT || 3000;
 
-const app = express();
-
-// Crear el servidor API Gateway con la configuración y conectarlo con Express
-gateway({
-    server: app, // Reutiliza la misma instancia de Express
+// Crear el servidor API Gateway
+const server = gateway({
     routes: [
         {
             prefix: '/pagos',
-            target: 'http://localhost:8082/',
+            target: 'https://pagos-service.onrender.com',
             hooks: {}
         },
         {
             prefix: '/pedidos',
-            target: 'http://localhost:8081/',
+            target: 'https://pedidos-service.onrender.com',
             hooks: {}
         },
         {
             prefix: '/inventario',
-            target: 'http://localhost:8083/',
+            target: 'https://inventario-service.onrender.com',
             hooks: {}
         }
     ]
 });
+
+// Iniciar el API Gateway en el puerto proporcionado por Render o el puerto por defecto
+server.start(port).then(() => {
+    console.log('API Gateway ejecutándose en el puerto: ' + port);
+});
+
+// Crear el servidor Express para manejar las solicitudes del contenido estático
+const app = express();
 
 // Servir el archivo index.html desde la raíz del directorio api-gateway
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Iniciar el servidor Express en el puerto proporcionado
+// Iniciar el servidor Express en el mismo puerto proporcionado por Render
 app.listen(port, () => {
-    console.log('API Gateway y servidor de contenido estático ejecutándose en el puerto: ' + port);
+    console.log('Servidor de contenido estático ejecutándose en el puerto: ' + port);
 });
