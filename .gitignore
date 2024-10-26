@@ -1,2 +1,5 @@
 node_modules
-package.json
+pagos/package-lock.json
+pedidos/package-lock.json
+inventario/package-lock.json
+serviceAccountKey.json

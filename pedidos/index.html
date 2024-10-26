@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microservicio de Pedidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        .container {
+            text-align: center;
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        input, select {
+            width: calc(100% - 2rem);
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pedidos Registrados</h1>
+        <form id="pedido-form">
+            <select id="productoSelect" required>
+                <option value="">Seleccione un producto</option>
+            </select>
+            <input type="text" id="nombreProducto" placeholder="Nombre del Producto" readonly>
+            <input type="number" id="precioProducto" placeholder="Precio del Producto" readonly>
+            <input type="number" id="cantidad" placeholder="Cantidad" required>
+            <input type="text" id="nombrePedido" placeholder="Nombre del Pedido" required>
+            <button type="submit">Agregar Pedido</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cargar productos del inventario al cargar la página
+            fetch('/inventario/lista-productos')
+                .then(response => response.json())
+                .then(data => {
+                    const productoSelect = document.getElementById('productoSelect');
+                    console.log('Productos obtenidos:', data);
+                    data.data.item.forEach(producto => {
+                        const option = document.createElement('option');
+                        option.value = producto.id;
+                        option.text = `${producto.nombre} - Cantidad: ${producto.cantidad}`;
+                        option.dataset.nombre = producto.nombre;
+                        option.dataset.precio = producto.precio;
+                        productoSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar los productos:', error);
+                });
+
+            // Cambiar los inputs cuando se seleccione un producto
+            const productoSelect = document.getElementById('productoSelect');
+            productoSelect.addEventListener('change', function () {
+                const selectedOption = productoSelect.options[productoSelect.selectedIndex];
+                document.getElementById('nombreProducto').value = selectedOption.dataset.nombre || '';
+                document.getElementById('precioProducto').value = selectedOption.dataset.precio || '';
+            });
+
+            // Agregar nuevo pedido
+            const pedidoForm = document.getElementById('pedido-form');
+            pedidoForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const productoId = productoSelect.value;
+                const nombreProducto = document.getElementById('nombreProducto').value;
+                const precioProducto = parseInt(document.getElementById('precioProducto').value);
+                const cantidad = parseInt(document.getElementById('cantidad').value);
+                const nombrePedido = document.getElementById('nombrePedido').value;
+
+                if (!productoId) {
+                    alert('Seleccione un producto antes de realizar el pedido');
+                    return;
+                }
+
+                // Calcular el total del pedido
+                const total = precioProducto * cantidad;
+
+                const nuevoPedido = {
+                    productoId: productoId,
+                    nombreProducto: nombreProducto,
+                    precioProducto: precioProducto,
+                    cantidad: cantidad,
+                    nombrePedido: nombrePedido,
+                    total: total
+                };
+
+                console.log('Nuevo pedido:', nuevoPedido);
+
+                fetch('/pedidos/add-pedido', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(nuevoPedido)
+                })
+                .then(response => {
+                    console.log('Respuesta del servidor:', response);
+                    if (response.ok) {
+                        alert('Pedido agregado con éxito');
+                        location.reload(); // Recargar para ver el nuevo pedido agregado
+                    } else {
+                        response.text().then(text => {
+                            console.error('Error del servidor:', text);
+                            alert('Error al agregar el pedido: ' + text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al agregar pedido:', error);
+                    alert('Error al agregar el pedido');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

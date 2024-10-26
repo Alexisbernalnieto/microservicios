@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microservicio de Pagos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        .container {
+            text-align: center;
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        button {
+            background: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        .pedido-card {
+            background: #fff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .pedido-card h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .pedido-card p {
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pedidos Pendientes de Pago</h1>
+        <div id="pedidos-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cargar pedidos pendientes de pago al cargar la página
+        axios.get('http://localhost:8082/lista-pedidos-pendientes')
+            .then(response => {
+                console.log('Pedidos obtenidos:', response.data);
+                const pedidosContainer = document.getElementById('pedidos-container');
+                pedidosContainer.innerHTML = '';
+
+                if (response.data.data.item.length === 0) {
+                    pedidosContainer.innerHTML = '<p>No hay pedidos pendientes de pago.</p>';
+                    return;
+                }
+
+                response.data.data.item.forEach(pedido => {
+                    const pedidoCard = document.createElement('div');
+                    pedidoCard.classList.add('pedido-card');
+
+                    pedidoCard.innerHTML = `
+                        <h2>Producto: ${pedido.nombreProducto}</h2>
+                        <p><strong>Precio:</strong> ${pedido.precioProducto} MXN</p>
+                        <p><strong>Cantidad:</strong> ${pedido.cantidad}</p>
+                        <p><strong>Total:</strong> ${pedido.total} MXN</p>
+                        <p><strong>Pedido a nombre de:</strong> ${pedido.nombrePedido}</p>
+                        <button data-id="${pedido.id}" class="pagar-btn">Pagar</button>
+                    `;
+
+                    pedidosContainer.appendChild(pedidoCard);
+                });
+
+                const pagarBtns = document.querySelectorAll('.pagar-btn');
+                pagarBtns.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const pedidoId = this.getAttribute('data-id');
+
+                        axios.post(`http://localhost:8082/pagar-pedido/${pedidoId}`)
+                            .then(response => {
+                                alert('Pedido pagado con éxito');
+                                location.reload();
+                            })
+                            .catch(error => {
+                                console.error('Error al pagar el pedido:', error);
+                                alert('Error al pagar el pedido');
+                            });
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener los pedidos:', error);
+                document.getElementById('pedidos-container').innerHTML = '<p>Error al cargar los pedidos pendientes.</p>';
+            });
+    });
+</script>
+</body>
+</html>
