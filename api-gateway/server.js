@@ -2,11 +2,14 @@ const gateway = require('fast-gateway');
 const express = require('express');
 const path = require('path');
 
-const gatewayPort = 3000; // Puerto del API Gateway
-const staticPort = 3001; // Puerto del servidor de contenido estático
+// Utiliza el puerto proporcionado por Render o el puerto 3002 si no está definido
+const port = process.env.PORT || 3000;
 
-// Crear el servidor API Gateway
-const server = gateway({
+const app = express();
+
+// Crear el servidor API Gateway con la configuración y conectarlo con Express
+gateway({
+    server: app, // Reutiliza la misma instancia de Express
     routes: [
         {
             prefix: '/pagos',
@@ -26,20 +29,12 @@ const server = gateway({
     ]
 });
 
-// Iniciar el API Gateway en el puerto 3000
-server.start(gatewayPort).then(() => {
-    console.log('API Gateway ejecutándose en el puerto: ' + gatewayPort);
-});
-
-// Crear el servidor Express para manejar las solicitudes del contenido estático
-const app = express();
-
 // Servir el archivo index.html desde la raíz del directorio api-gateway
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Iniciar el servidor Express en el puerto 3001
-app.listen(staticPort, () => {
-    console.log('Servidor de contenido estático ejecutándose en el puerto: ' + staticPort);
+// Iniciar el servidor Express en el puerto proporcionado
+app.listen(port, () => {
+    console.log('API Gateway y servidor de contenido estático ejecutándose en el puerto: ' + port);
 });
