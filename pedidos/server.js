@@ -2,22 +2,23 @@ const express = require('express');
 const admin = require('firebase-admin');
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 const app = express();
 
-// Configuración para análisis del cuerpo de las solicitudes
+// Middleware para análisis del cuerpo de las solicitudes y CORS
 app.use(bodyParser.json());
+app.use(cors());
 
 // Inicializar Firebase
 const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); // Ruta del archivo de credenciales que se cargará como secreto
 
 admin.initializeApp({
   credential: admin.credential.cert(require(serviceAccountPath)),
-  databaseURL: "firebase-adminsdk-dwsf9@microservicios-16180.iam.gserviceaccount.com" // Cambia <your-project-id> por el ID de tu proyecto Firebase
+  databaseURL: "firebase-adminsdk-dwsf9@microservicios-16180.iam.gserviceaccount.com" // Asegúrate de reemplazar <your-project-id> con tu verdadero ID de proyecto en Firebase
 });
 
 const db = admin.firestore(); // Conexión a Firestore
-
-const port = process.env.PORT || 8081; // Cambiar a process.env.PORT
+const port = process.env.PORT || 8081; // Cambiar a process.env.PORT para que Render determine el puerto
 
 // Ruta para servir el archivo HTML principal (index.html)
 app.get('/', (req, res) => {
