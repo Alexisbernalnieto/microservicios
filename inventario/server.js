@@ -2,15 +2,19 @@ const express = require('express');
 const admin = require('firebase-admin');
 const path = require('path');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
+
+// Middleware para analizar el cuerpo de las solicitudes y CORS
 app.use(bodyParser.json());
+app.use(cors());
 
 // Inicializar Firebase
 const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); // Ruta del archivo de credenciales que se cargará como secreto
 
 admin.initializeApp({
   credential: admin.credential.cert(require(serviceAccountPath)),
-  databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com" // Cambia esto al URL de tu base de datos si es necesario
+  databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com" // Cambia <your-project-id> por el ID de tu proyecto en Firebase
 });
 
 const db = admin.firestore(); // Conexión a Firestore
@@ -35,10 +39,15 @@ app.post('/agregar-producto', async (req, res) => {
     }
 
     try {
+        // Validar si la cantidad y el precio son números válidos
+        if (isNaN(cantidad) || isNaN(precio) || cantidad < 0 || precio < 0) {
+            return res.status(400).send('La cantidad y el precio deben ser números positivos válidos');
+        }
+
         const nuevoProducto = {
             nombre: nombre,
-            cantidad: cantidad,
-            precio: precio
+            cantidad: parseInt(cantidad), // Asegurarse de que la cantidad sea un número
+            precio: parseFloat(precio) // Asegurarse de que el precio sea un número
         };
 
         const response = await db.collection('inventario').add(nuevoProducto);
