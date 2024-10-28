@@ -14,7 +14,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore(); // Conexión a Firestore
-const port = 8083;
+const port = process.env.PORT || 8083; // Cambiar a process.env.PORT
 
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname)));

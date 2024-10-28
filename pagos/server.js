@@ -14,7 +14,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore(); // Conexión a Firestore
-const port = 8082; // Asegúrate de usar el puerto correcto
+const port = process.env.PORT || 8082; // Cambiar a process.env.PORT
 
 // Servir el archivo HTML de pagos cuando se visita la raíz del servidor
 app.get('/', (req, res) => {

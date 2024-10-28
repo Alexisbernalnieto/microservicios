@@ -17,7 +17,7 @@ admin.initializeApp({
 
 const db = admin.firestore(); // Conexión a Firestore
 
-const port = 8081;
+const port = process.env.PORT || 8081; // Cambiar a process.env.PORT
 
 // Ruta para servir el archivo HTML principal (index.html)
 app.get('/', (req, res) => {
