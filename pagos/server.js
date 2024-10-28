@@ -1,15 +1,17 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
-const path = require('path'); // Necesario para trabajar con rutas de archivos
+const path = require('path');
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
 // Inicializar Firebase
-const serviceAccount = require('../serviceAccountKey.json'); // Ajusta la ruta si es necesario
+const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); // Ruta para el archivo de credenciales almacenado como secreto en Render
+
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(require(serviceAccountPath)),
   databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com"
 });
 
@@ -41,7 +43,7 @@ app.get('/lista-pedidos-pendientes', async (req, res) => {
     }
 });
 
-
+// Ruta para actualizar el estado del pedido a "Pagado"
 app.post('/pagar-pedido/:id', async (req, res) => {
     const pedidoId = req.params.id;
 

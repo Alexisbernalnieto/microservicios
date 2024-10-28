@@ -13,7 +13,7 @@ try {
         routes: [
             {
                 prefix: '/pagos',
-                target: 'https://pagos-service.onrender.com',  // URL de Render del microservicio de pagos
+                target: 'https://pagos-sowr.onrender.com',  // URL de Render del microservicio de pagos
                 hooks: {}
             },
             {

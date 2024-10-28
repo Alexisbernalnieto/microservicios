@@ -8,11 +8,11 @@ const app = express();
 app.use(bodyParser.json());
 
 // Inicializar Firebase
-const serviceAccount = require('../serviceAccountKey.json'); // Ajusta la ruta si es necesario
+const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); // Ruta del archivo de credenciales que se cargará como secreto
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com" // Cambia <your-project-id> por el ID de tu proyecto de Firebase
+  credential: admin.credential.cert(require(serviceAccountPath)),
+  databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com" // Cambia esto al URL de tu base de datos si es necesario
 });
 
 const db = admin.firestore(); // Conexión a Firestore
@@ -92,8 +92,6 @@ app.post('/add-pedido', async (req, res) => {
     }
 });
 
-
-
 // Ruta para obtener lista de productos del inventario
 app.get('/lista-productos', async (req, res) => {
     try {
@@ -113,7 +111,6 @@ app.get('/lista-productos', async (req, res) => {
         res.status(500).send('Error al obtener lista de productos');
     }
 });
-
 
 // Iniciar el servidor
 app.listen(port, () => {
