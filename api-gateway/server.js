@@ -9,17 +9,17 @@ const gatewayServer = gateway({
     routes: [
         {
             prefix: '/pagos',
-            target: 'https://pagos-sowr.onrender.com',  // URL del microservicio de pagos
+            target: 'https://pagos-sowr.onrender.com/api/pagos/',  // URL del microservicio de pagos
             hooks: {}
         },
         {
             prefix: '/pedidos',
-            target: 'https://pedidos-xkuu.onrender.com',  // URL del microservicio de pedidos
+            target: 'https://pedidos-xkuu.onrender.com/api/pedidos/',  // URL del microservicio de pedidos
             hooks: {}
         },
         {
             prefix: '/inventario',
-            target: 'https://inventario-r2xk.onrender.com',  // URL del microservicio de inventario
+            target: 'https://inventario-r2xk.onrender.com/api/inventario/',  // URL del microservicio de inventario
             hooks: {}
         }
     ]
