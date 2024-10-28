@@ -78,58 +78,61 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Cargar pedidos pendientes de pago al cargar la página
-        axios.get('http://localhost:8082/lista-pedidos-pendientes')
-            .then(response => {
-                console.log('Pedidos obtenidos:', response.data);
-                const pedidosContainer = document.getElementById('pedidos-container');
-                pedidosContainer.innerHTML = '';
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cambia la URL a la URL pública de tu microservicio de pagos en Render
+            const baseUrl = 'https://inventario-r2xk.onrender.com/'; // Reemplaza 'pagos-xxxx' por el identificador correcto de tu servicio en Render
 
-                if (response.data.data.item.length === 0) {
-                    pedidosContainer.innerHTML = '<p>No hay pedidos pendientes de pago.</p>';
-                    return;
-                }
+            // Cargar pedidos pendientes de pago al cargar la página
+            axios.get(`${baseUrl}/lista-pedidos-pendientes`)
+                .then(response => {
+                    console.log('Pedidos obtenidos:', response.data);
+                    const pedidosContainer = document.getElementById('pedidos-container');
+                    pedidosContainer.innerHTML = '';
 
-                response.data.data.item.forEach(pedido => {
-                    const pedidoCard = document.createElement('div');
-                    pedidoCard.classList.add('pedido-card');
+                    if (response.data.data.item.length === 0) {
+                        pedidosContainer.innerHTML = '<p>No hay pedidos pendientes de pago.</p>';
+                        return;
+                    }
 
-                    pedidoCard.innerHTML = `
-                        <h2>Producto: ${pedido.nombreProducto}</h2>
-                        <p><strong>Precio:</strong> ${pedido.precioProducto} MXN</p>
-                        <p><strong>Cantidad:</strong> ${pedido.cantidad}</p>
-                        <p><strong>Total:</strong> ${pedido.total} MXN</p>
-                        <p><strong>Pedido a nombre de:</strong> ${pedido.nombrePedido}</p>
-                        <button data-id="${pedido.id}" class="pagar-btn">Pagar</button>
-                    `;
+                    response.data.data.item.forEach(pedido => {
+                        const pedidoCard = document.createElement('div');
+                        pedidoCard.classList.add('pedido-card');
 
-                    pedidosContainer.appendChild(pedidoCard);
-                });
+                        pedidoCard.innerHTML = `
+                            <h2>Producto: ${pedido.nombreProducto}</h2>
+                            <p><strong>Precio:</strong> ${pedido.precioProducto} MXN</p>
+                            <p><strong>Cantidad:</strong> ${pedido.cantidad}</p>
+                            <p><strong>Total:</strong> ${pedido.total} MXN</p>
+                            <p><strong>Pedido a nombre de:</strong> ${pedido.nombrePedido}</p>
+                            <button data-id="${pedido.id}" class="pagar-btn">Pagar</button>
+                        `;
 
-                const pagarBtns = document.querySelectorAll('.pagar-btn');
-                pagarBtns.forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const pedidoId = this.getAttribute('data-id');
-
-                        axios.post(`http://localhost:8082/pagar-pedido/${pedidoId}`)
-                            .then(response => {
-                                alert('Pedido pagado con éxito');
-                                location.reload();
-                            })
-                            .catch(error => {
-                                console.error('Error al pagar el pedido:', error);
-                                alert('Error al pagar el pedido');
-                            });
+                        pedidosContainer.appendChild(pedidoCard);
                     });
+
+                    const pagarBtns = document.querySelectorAll('.pagar-btn');
+                    pagarBtns.forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const pedidoId = this.getAttribute('data-id');
+
+                            axios.post(`${baseUrl}/pagar-pedido/${pedidoId}`)
+                                .then(response => {
+                                    alert('Pedido pagado con éxito');
+                                    location.reload();
+                                })
+                                .catch(error => {
+                                    console.error('Error al pagar el pedido:', error);
+                                    alert('Error al pagar el pedido');
+                                });
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los pedidos:', error);
+                    document.getElementById('pedidos-container').innerHTML = '<p>Error al cargar los pedidos pendientes.</p>';
                 });
-            })
-            .catch(error => {
-                console.error('Error al obtener los pedidos:', error);
-                document.getElementById('pedidos-container').innerHTML = '<p>Error al cargar los pedidos pendientes.</p>';
-            });
-    });
-</script>
+        });
+    </script>
 </body>
 </html>

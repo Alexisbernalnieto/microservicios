@@ -5,27 +5,25 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 
-// Middleware para analizar el cuerpo de las solicitudes y CORS
+// Middleware para analizar el cuerpo de las solicitudes y habilitar CORS
 app.use(bodyParser.json());
 app.use(cors());
 
-// Inicializar Firebase
-const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); // Ruta del archivo de credenciales que se cargará como secreto
+// Inicializar Firebase con la credencial y URL de la base de datos
+const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); // Ruta del archivo de credenciales que se cargará como secreto en Render
 
 admin.initializeApp({
   credential: admin.credential.cert(require(serviceAccountPath)),
-  databaseURL: "firebase-adminsdk-dwsf9@microservicios-16180.iam.gserviceaccount.com" // Cambia <your-project-id> por el ID de tu proyecto en Firebase
+  databaseURL: "firebase-adminsdk-dwsf9@microservicios-16180.iam.gserviceaccount.com" // Cambiar a la URL válida de tu proyecto Firebase
 });
 
 const db = admin.firestore(); // Conexión a Firestore
 const port = process.env.PORT || 8083; // Usar process.env.PORT para que Render determine el puerto
 
-// Servir archivos estáticos
+// Servir archivos estáticos (incluye index.html)
 app.use(express.static(path.join(__dirname)));
 
-// RUTAS
-
-// Ruta principal
+// Ruta principal para servir el archivo HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -46,8 +44,8 @@ app.post('/agregar-producto', async (req, res) => {
 
         const nuevoProducto = {
             nombre: nombre,
-            cantidad: parseInt(cantidad), // Asegurarse de que la cantidad sea un número
-            precio: parseFloat(precio) // Asegurarse de que el precio sea un número
+            cantidad: parseInt(cantidad), // Asegurarse de que la cantidad sea un número entero
+            precio: parseFloat(precio) // Asegurarse de que el precio sea un número flotante
         };
 
         const response = await db.collection('inventario').add(nuevoProducto);
