@@ -90,7 +90,8 @@
                     precio: precio
                 };
 
-                fetch('http://localhost:3000/inventario/agregar-producto', {
+                // Cambia la URL a la del microservicio en Render
+                fetch('https://inventario-r2xk.onrender.com/agregar-producto', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -102,7 +103,10 @@
                         alert('Producto agregado con éxito');
                         location.reload(); // Recargar para ver el nuevo producto agregado
                     } else {
-                        alert('Error al agregar el producto');
+                        response.text().then(text => {
+                            console.error('Error del servidor:', text);
+                            alert('Error al agregar el producto: ' + text);
+                        });
                     }
                 })
                 .catch(error => {
@@ -114,3 +118,5 @@
     </script>
 </body>
 </html>
+
+
