@@ -12,7 +12,7 @@ const serviceAccountPath = path.join('/etc/secrets', 'serviceAccountKey.json'); 
 
 admin.initializeApp({
   credential: admin.credential.cert(require(serviceAccountPath)),
-  databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com"
+  databaseURL: "firebase-adminsdk-nvjo0@microservicios-f821e.iam.gserviceaccount.com" // Reemplaza con tu ID de proyecto Firebase
 });
 
 const db = admin.firestore(); // Conexión a Firestore
