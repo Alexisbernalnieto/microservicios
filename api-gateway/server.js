@@ -2,46 +2,44 @@ const gateway = require('fast-gateway');
 const express = require('express');
 const path = require('path');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000; // Puerto para el API Gateway y servidor Express
 
 // Crear el servidor Express principal
 const app = express();
 
-try {
-    // Configurar Fast-Gateway como middleware en el servidor Express principal
-    const gatewayServer = gateway({
-        routes: [
-            {
-                prefix: '/pagos',
-                target: 'https://pagos-sowr.onrender.com',  // URL de Render del microservicio de pagos
-                hooks: {}
-            },
-            {
-                prefix: '/pedidos',
-                target: 'https://pedidos-service.onrender.com',  // URL de Render del microservicio de pedidos
-                hooks: {}
-            },
-            {
-                prefix: '/inventario',
-                target: 'https://inventario-service.onrender.com',  // URL de Render del microservicio de inventario
-                hooks: {}
-            }
-        ]
-    });
+// Servir el archivo index.html para la raíz
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-    // Montar el gateway como middleware en Express
-    app.use('/api', gatewayServer.middleware());
+// Crear el servidor API Gateway
+const gatewayServer = gateway({
+    server: app, // Usar el servidor Express existente
+    routes: [
+        {
+            prefix: '/pagos',
+            target: 'https://pagos-sowr.onrender.com',  // URL de Render del microservicio de pagos
+            hooks: {}
+        },
+        {
+            prefix: '/pedidos',
+            target: 'https://pedidos-xkuu.onrender.com',  // URL de Render del microservicio de pedidos
+            hooks: {}
+        },
+        {
+            prefix: '/inventario',
+            target: 'https://inventario-r2xk.onrender.com',  // URL de Render del microservicio de inventario
+            hooks: {}
+        }
+    ]
+});
 
-    // Servir el archivo index.html para la raíz
-    app.get('/', (req, res) => {
-        res.sendFile(path.join(__dirname, 'index.html'));
-    });
-
-    // Iniciar el servidor Express que incluye el API Gateway y el contenido estático
-    app.listen(port, () => {
+// Iniciar el API Gateway en el puerto especificado
+gatewayServer.start(port)
+    .then(server => {
         console.log(`Servidor de contenido estático y API Gateway ejecutándose en el puerto: ${port}`);
+    })
+    .catch(err => {
+        console.error('Error al iniciar el servidor API Gateway:', err);
+        process.exit(1); // Termina el proceso con un error
     });
-} catch (error) {
-    console.error('Error al iniciar el servidor:', error);
-    process.exit(1); // Termina el proceso con un error
-}
