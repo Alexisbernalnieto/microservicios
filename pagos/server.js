@@ -59,7 +59,10 @@ app.post('/pagar-pedido/:id', async (req, res) => {
             estado: 'Pagado'
         });
 
-        res.status(200).send('Pedido pagado con éxito');
+        res.status(200).json({
+            message: 'Pedido pagado con éxito',
+            pedidoId: pedidoId
+        });
     } catch (error) {
         console.error('Error al actualizar estado del pedido:', error);
         res.status(500).send('Error al pagar el pedido');
